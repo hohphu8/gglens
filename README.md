@@ -1,2 +1,3 @@
 # [PHP] gglens - bypass captcha, text-detect 
-- Last update (12/2025)
+- Last update (02/2026)
+  - Update request with cookie (improve speed)
