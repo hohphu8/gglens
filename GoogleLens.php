@@ -62,12 +62,20 @@ readonly final class GoogleLens {
         $postData .= "$contentFile\r\n";
         $postData .= "--$boundary--\r\n";
 
+        //Change your cookie here...
+        $yourCookie = '__Secure-1PSID={cookie_value}; __Secure-1PSIDTS={cookie_value}';
+
         $start = microtime(true);
         $response = $this->post($url, $postData, [
+            "cookie: $yourCookie",
             "Content-Type: multipart/form-data; boundary=$boundary",
             'Referer: https://lens.google.com/',
             'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
         ]);
+
+        preg_match('#location:(.+)\n#', $response, $location);
+
+        $rsLink = trim($location[1]);
         
         preg_match('#vsrid=(.*?)\&#', $response, $vsrid);
         preg_match('#lsessionid=(.*?)\&#', $response, $lsessionid);
@@ -82,14 +90,14 @@ readonly final class GoogleLens {
 
         $url = "https://lens.google.com/qfmetadata?vsrid={$vsrid[1]}&lsessionid={$lsessionid[1]}";
 
-        $cookie = '';
-        preg_match_all('/^set-cookie:\s*([^;]*)/mi', $response, $matches);
-        foreach($matches[1] as $item) {
-            $cookie .= "$item; ";
-        }
+        $rs = $this->get($rsLink, [
+            "Cookie: $yourCookie",
+            'referer: https://www.google.com/',
+            'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
+        ]);
 
         $response = $this->get($url, [
-            "Cookie: $cookie",
+            "Cookie: $yourCookie",
             'referer: https://www.google.com/',
             'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
         ]);
